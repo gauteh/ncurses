@@ -92,5 +92,6 @@ testscanw	$(LDFLAGS_CURSES)	$(LOCAL_LIBS)	testscanw
 view		$(LDFLAGS_CURSES)	$(LOCAL_LIBS)	view
 worm		$(LDFLAGS_THREADS)	$(LOCAL_LIBS)	worm
 xmas		$(LDFLAGS_CURSES)	$(LOCAL_LIBS)	xmas
+form_driver_w $(LDFLAGS_DEFAULT) $(LOCAL_LIBS) form_driver_w
 
 # vile:makemode

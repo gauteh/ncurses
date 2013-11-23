@@ -95,5 +95,6 @@ testscanw	progs		$(srcdir)	$(HEADER_DEPS)
 view		progs		$(srcdir)	$(HEADER_DEPS)	$(srcdir)/widechars.h
 worm		progs		$(srcdir)	$(HEADER_DEPS)
 xmas		progs		$(srcdir)	$(HEADER_DEPS)
+form_driver_w progs $(srcdir) $(HEADER_DEPS) ../include/form.h
 
 # vile:makemode

@@ -396,6 +396,11 @@ extern NCURSES_EXPORT(int)	post_form (FORM *);
 extern NCURSES_EXPORT(int)	unpost_form (FORM *);
 extern NCURSES_EXPORT(int)	pos_form_cursor (FORM *);
 extern NCURSES_EXPORT(int)	form_driver (FORM *,int);
+# ifdef USE_WIDEC_SUPPORT
+# if USE_WIDEC_SUPPORT
+extern NCURSES_EXPORT(int)	form_driver_w (FORM *,int,wchar_t);
+# endif
+# endif
 extern NCURSES_EXPORT(int)	set_form_userptr (FORM *,void *);
 extern NCURSES_EXPORT(int)	set_form_opts (FORM *,Form_Options);
 extern NCURSES_EXPORT(int)	form_opts_on (FORM *,Form_Options);
