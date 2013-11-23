@@ -4007,61 +4007,61 @@ Data_Entry_w(FORM *form, wchar_t c)
 #if FIX_FORM_INACTIVE_BUG
       && (field->opts & O_ACTIVE)
 #endif
-    )
+     )
+  {
+    if ((field->opts & O_BLANK) &&
+        First_Position_In_Current_Field(form) &&
+        !(form->status & _FCHECK_REQUIRED) &&
+        !(form->status & _WINDOW_MODIFIED))
+      werase(form->w);
+
+    if (form->status & _OVLMODE)
     {
-      if ((field->opts & O_BLANK) &&
-	  First_Position_In_Current_Field(form) &&
-	  !(form->status & _FCHECK_REQUIRED) &&
-	  !(form->status & _WINDOW_MODIFIED))
-	werase(form->w);
-
-      if (form->status & _OVLMODE)
-	{
-	  wadd_wch(form->w, &t);
-	}
-      else
-	/* no _OVLMODE */
-	{
-	  bool There_Is_Room = Is_There_Room_For_A_Char_In_Line(form);
-
-	  if (!(There_Is_Room ||
-		((Single_Line_Field(field) && Growable(field)))))
-	    RETURN(E_REQUEST_DENIED);
-
-	  if (!There_Is_Room && !Field_Grown(field, 1))
-	    RETURN(E_SYSTEM_ERROR);
-
-	  wins_wch(form->w, &t);
-	}
-
-      if ((result = Wrapping_Not_Necessary_Or_Wrapping_Ok(form)) == E_OK)
-	{
-	  bool End_Of_Field = (((field->drows - 1) == form->currow) &&
-			       ((field->dcols - 1) == form->curcol));
-
-	  form->status |= _WINDOW_MODIFIED;
-	  if (End_Of_Field && !Growable(field) && (field->opts & O_AUTOSKIP))
-	    result = Inter_Field_Navigation(FN_Next_Field, form);
-	  else
-	    {
-	      if (End_Of_Field && Growable(field) && !Field_Grown(field, 1))
-		result = E_SYSTEM_ERROR;
-	      else
-		{
-		  /*
-		   * We have just added a byte to the form field.  It may have
-		   * been part of a multibyte character.  If it was, the
-		   * addch_used field is nonzero and we should not try to move
-		   * to a new column.
-		   */
-		  if (WINDOW_EXT(form->w, addch_used) == 0)
-		    IFN_Next_Character(form);
-
-		  result = E_OK;
-		}
-	    }
-	}
+      wadd_wch(form->w, &t);
     }
+    else
+      /* no _OVLMODE */
+    {
+      bool There_Is_Room = Is_There_Room_For_A_Char_In_Line(form);
+
+      if (!(There_Is_Room ||
+            ((Single_Line_Field(field) && Growable(field)))))
+        RETURN(E_REQUEST_DENIED);
+
+      if (!There_Is_Room && !Field_Grown(field, 1))
+        RETURN(E_SYSTEM_ERROR);
+
+      wins_wch(form->w, &t);
+    }
+
+    if ((result = Wrapping_Not_Necessary_Or_Wrapping_Ok(form)) == E_OK)
+    {
+      bool End_Of_Field = (((field->drows - 1) == form->currow) &&
+          ((field->dcols - 1) == form->curcol));
+
+      form->status |= _WINDOW_MODIFIED;
+      if (End_Of_Field && !Growable(field) && (field->opts & O_AUTOSKIP))
+        result = Inter_Field_Navigation(FN_Next_Field, form);
+      else
+      {
+        if (End_Of_Field && Growable(field) && !Field_Grown(field, 1))
+          result = E_SYSTEM_ERROR;
+        else
+        {
+          /*
+           * We have just added a byte to the form field.  It may have
+           * been part of a multibyte character.  If it was, the
+           * addch_used field is nonzero and we should not try to move
+           * to a new column.
+           */
+          if (WINDOW_EXT(form->w, addch_used) == 0)
+            IFN_Next_Character(form);
+
+          result = E_OK;
+        }
+      }
+    }
+  }
   RETURN(result);
 }
 # endif
@@ -4500,15 +4500,15 @@ form_driver_w(FORM *form, int type, wchar_t c)
   assert(form->page);
 
   if (c == FIRST_ACTIVE_MAGIC)
-    {
-      form->current = _nc_First_Active_Field(form);
-      RETURN(E_OK);
-    }
+  {
+    form->current = _nc_First_Active_Field(form);
+    RETURN(E_OK);
+  }
 
-  assert(form->current &&
-	 form->current->buf &&
-	 (form->current->form == form)
-    );
+  assert( form->current &&
+          form->current->buf &&
+          (form->current->form == form)
+        );
 
   if (form->status & _IN_DRIVER)
     RETURN(E_BAD_STATE);
@@ -4525,116 +4525,116 @@ form_driver_w(FORM *form, int type, wchar_t c)
   }
 
   if (BI)
+  {
+    typedef int (*Generic_Method) (int (*const) (FORM *), FORM *);
+    static const Generic_Method Generic_Methods[] =
     {
-      typedef int (*Generic_Method) (int (*const) (FORM *), FORM *);
-      static const Generic_Method Generic_Methods[] =
-      {
-        Page_Navigation,	/* overloaded to call field&form hooks */
-        Inter_Field_Navigation,	/* overloaded to call field hooks      */
-        NULL,			/* Intra-Field is generic              */
-        Vertical_Scrolling,	/* Overloaded to check multi-line      */
-        Horizontal_Scrolling,	/* Overloaded to check single-line     */
-        Field_Editing,		/* Overloaded to mark modification     */
-        NULL,			/* Edit Mode is generic                */
-        NULL,			/* Field Validation is generic         */
-        NULL			/* Choice Request is generic           */
-      };
-      size_t nMethods = (sizeof(Generic_Methods) / sizeof(Generic_Methods[0]));
-      size_t method = (BI->keycode >> ID_Shft) & 0xffff;	/* see ID_Mask */
+      Page_Navigation,	      /* overloaded to call field&form hooks */
+      Inter_Field_Navigation,	/* overloaded to call field hooks      */
+      NULL,			              /* Intra-Field is generic              */
+      Vertical_Scrolling,	    /* Overloaded to check multi-line      */
+      Horizontal_Scrolling,	  /* Overloaded to check single-line     */
+      Field_Editing,		      /* Overloaded to mark modification     */
+      NULL,			              /* Edit Mode is generic                */
+      NULL,			              /* Field Validation is generic         */
+      NULL			              /* Choice Request is generic           */
+    };
+    size_t nMethods = (sizeof(Generic_Methods) / sizeof(Generic_Methods[0]));
+    size_t method = (BI->keycode >> ID_Shft) & 0xffff;	/* see ID_Mask */
 
-      if ((method >= nMethods) || !(BI->cmd))
-        res = E_SYSTEM_ERROR;
+    if ((method >= nMethods) || !(BI->cmd))
+      res = E_SYSTEM_ERROR;
+    else
+    {
+      Generic_Method fct = Generic_Methods[method];
+
+      if (fct)
+        res = fct(BI->cmd, form);
       else
-      {
-        Generic_Method fct = Generic_Methods[method];
-
-        if (fct)
-          res = fct(BI->cmd, form);
-        else
-          res = (BI->cmd) (form);
-      }
+        res = (BI->cmd) (form);
     }
+  }
 #ifdef NCURSES_MOUSE_VERSION
   else if (KEY_MOUSE == c)
-    {
-      MEVENT event;
-      WINDOW *win = form->win ? form->win : StdScreen(Get_Form_Screen(form));
-      WINDOW *sub = form->sub ? form->sub : win;
+  {
+    MEVENT event;
+    WINDOW *win = form->win ? form->win : StdScreen(Get_Form_Screen(form));
+    WINDOW *sub = form->sub ? form->sub : win;
 
-      getmouse(&event);
-      if ((event.bstate & (BUTTON1_CLICKED |
-			   BUTTON1_DOUBLE_CLICKED |
-			   BUTTON1_TRIPLE_CLICKED))
-	  && wenclose(win, event.y, event.x))
-	{			/* we react only if the click was in the userwin, that means
-				 * inside the form display area or at the decoration window.
-				 */
-	  int ry = event.y, rx = event.x;	/* screen coordinates */
+    getmouse(&event);
+    if ((event.bstate & (BUTTON1_CLICKED |
+            BUTTON1_DOUBLE_CLICKED |
+            BUTTON1_TRIPLE_CLICKED))
+        && wenclose(win, event.y, event.x))
+    {			/* we react only if the click was in the userwin, that means
+           * inside the form display area or at the decoration window.
+           */
+      int ry = event.y, rx = event.x;	/* screen coordinates */
 
-	  res = E_REQUEST_DENIED;
-	  if (mouse_trafo(&ry, &rx, FALSE))
-	    {			/* rx, ry are now "curses" coordinates */
-	      if (ry < sub->_begy)
-		{		/* we clicked above the display region; this is
-				 * interpreted as "scroll up" request
-				 */
-		  if (event.bstate & BUTTON1_CLICKED)
-		    res = form_driver(form, REQ_PREV_FIELD);
-		  else if (event.bstate & BUTTON1_DOUBLE_CLICKED)
-		    res = form_driver(form, REQ_PREV_PAGE);
-		  else if (event.bstate & BUTTON1_TRIPLE_CLICKED)
-		    res = form_driver(form, REQ_FIRST_FIELD);
-		}
-	      else if (ry > sub->_begy + sub->_maxy)
-		{		/* we clicked below the display region; this is
-				 * interpreted as "scroll down" request
-				 */
-		  if (event.bstate & BUTTON1_CLICKED)
-		    res = form_driver(form, REQ_NEXT_FIELD);
-		  else if (event.bstate & BUTTON1_DOUBLE_CLICKED)
-		    res = form_driver(form, REQ_NEXT_PAGE);
-		  else if (event.bstate & BUTTON1_TRIPLE_CLICKED)
-		    res = form_driver(form, REQ_LAST_FIELD);
-		}
-	      else if (wenclose(sub, event.y, event.x))
-		{		/* Inside the area we try to find the hit item */
-		  int i;
+      res = E_REQUEST_DENIED;
+      if (mouse_trafo(&ry, &rx, FALSE))
+      {			/* rx, ry are now "curses" coordinates */
+        if (ry < sub->_begy)
+        {		/* we clicked above the display region; this is
+             * interpreted as "scroll up" request
+             */
+          if (event.bstate & BUTTON1_CLICKED)
+            res = form_driver(form, REQ_PREV_FIELD);
+          else if (event.bstate & BUTTON1_DOUBLE_CLICKED)
+            res = form_driver(form, REQ_PREV_PAGE);
+          else if (event.bstate & BUTTON1_TRIPLE_CLICKED)
+            res = form_driver(form, REQ_FIRST_FIELD);
+        }
+        else if (ry > sub->_begy + sub->_maxy)
+        {		/* we clicked below the display region; this is
+             * interpreted as "scroll down" request
+             */
+          if (event.bstate & BUTTON1_CLICKED)
+            res = form_driver(form, REQ_NEXT_FIELD);
+          else if (event.bstate & BUTTON1_DOUBLE_CLICKED)
+            res = form_driver(form, REQ_NEXT_PAGE);
+          else if (event.bstate & BUTTON1_TRIPLE_CLICKED)
+            res = form_driver(form, REQ_LAST_FIELD);
+        }
+        else if (wenclose(sub, event.y, event.x))
+        {		/* Inside the area we try to find the hit item */
+          int i;
 
-		  ry = event.y;
-		  rx = event.x;
-		  if (wmouse_trafo(sub, &ry, &rx, FALSE))
-		    {
-		      int min_field = form->page[form->curpage].pmin;
-		      int max_field = form->page[form->curpage].pmax;
+          ry = event.y;
+          rx = event.x;
+          if (wmouse_trafo(sub, &ry, &rx, FALSE))
+          {
+            int min_field = form->page[form->curpage].pmin;
+            int max_field = form->page[form->curpage].pmax;
 
-		      for (i = min_field; i <= max_field; ++i)
-			{
-			  FIELD *field = form->field[i];
+            for (i = min_field; i <= max_field; ++i)
+            {
+              FIELD *field = form->field[i];
 
-			  if (Field_Is_Selectable(field)
-			      && Field_encloses(field, ry, rx) == E_OK)
-			    {
-			      res = _nc_Set_Current_Field(form, field);
-			      if (res == E_OK)
-				res = _nc_Position_Form_Cursor(form);
-			      if (res == E_OK
-				  && (event.bstate & BUTTON1_DOUBLE_CLICKED))
-				res = E_UNKNOWN_COMMAND;
-			      break;
-			    }
-			}
-		    }
-		}
-	    }
-	}
-      else
-	res = E_REQUEST_DENIED;
+              if (Field_Is_Selectable(field)
+                  && Field_encloses(field, ry, rx) == E_OK)
+              {
+                res = _nc_Set_Current_Field(form, field);
+                if (res == E_OK)
+                  res = _nc_Position_Form_Cursor(form);
+                if (res == E_OK
+                    && (event.bstate & BUTTON1_DOUBLE_CLICKED))
+                  res = E_UNKNOWN_COMMAND;
+                break;
+              }
+            }
+          }
+        }
+      }
     }
+    else
+      res = E_REQUEST_DENIED;
+  }
 #endif /* NCURSES_MOUSE_VERSION */
   else if (type == OK)
-    {
-      res = Data_Entry_w(form, c);
-    }
+  {
+    res = Data_Entry_w(form, c);
+  }
 
   _nc_Refresh_Current_Field(form);
   RETURN(res);
