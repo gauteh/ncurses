@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 2013 Gaute Hope <eg@gaute.vetsj.com>
+ * Copyright (c) 2013 Free Software Foundation, Inc.                        *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
  * copy of this software and associated documentation files (the            *
@@ -24,6 +24,10 @@
  * holders shall not be used in advertising or otherwise to promote the     *
  * sale, use or other dealings in this Software without prior written       *
  * authorization.                                                           *
+ ****************************************************************************/
+
+/****************************************************************************
+ *   Author:  Gaute Hope, 2013                                              *
  ****************************************************************************/
 /*
 
