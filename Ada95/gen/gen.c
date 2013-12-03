@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 1998,2010,2011 Free Software Foundation, Inc.              *
+ * Copyright (c) 1998-2011,2013 Free Software Foundation, Inc.              *
  *                                                                          *
  * Permission is hereby granted, free of charge, to any person obtaining a  *
  * copy of this software and associated documentation files (the            *
@@ -32,7 +32,7 @@
 
 /*
     Version Control
-    $Id: gen.c,v 1.59 2011/03/31 23:50:24 tom Exp $
+    $Id: gen.c,v 1.61 2013/08/24 23:30:46 tom Exp $
   --------------------------------------------------------------------------*/
 /*
   This program generates various record structures and constants from the
@@ -124,19 +124,15 @@ gen_reps(
 	  int len,		/* size of the record in bytes          */
 	  int bias)
 {
-  const char *unused_name = "Unused";
-  int long_bits = (8 * (int)sizeof(unsigned long));
-  int len_bits = (8 * len);
-  int i, j, n, l, cnt = 0, low, high;
+  const int len_bits = (8 * len);
+  int i, l, low, high;
   int width = strlen(RES_NAME) + 3;
   unsigned long a;
-  unsigned long mask = 0;
 
   assert(nap != NULL);
 
   for (i = 0; nap[i].name != (char *)0; i++)
     {
-      cnt++;
       l = (int)strlen(nap[i].name);
       if (l > width)
 	width = l;
@@ -147,31 +143,7 @@ gen_reps(
   printf("      record\n");
   for (i = 0; nap[i].name != (char *)0; i++)
     {
-      mask |= nap[i].attr;
       printf("         %-*s : Boolean;\n", width, nap[i].name);
-    }
-
-  /*
-   * Compute a mask for the unused bits in this target.
-   */
-  mask = ~mask;
-  /*
-   * Bits in the biased area are unused by the target.
-   */
-  for (j = 0; j < bias; ++j)
-    {
-      mask &= (unsigned long)(~(1L << j));
-    }
-  /*
-   * Bits past the target's size are really unused.
-   */
-  for (j = len_bits + bias; j < long_bits; ++j)
-    {
-      mask &= (unsigned long)(~(1L << j));
-    }
-  if (mask != 0)
-    {
-      printf("         %-*s : Boolean;\n", width, unused_name);
     }
   printf("      end record;\n");
   printf("   pragma Convention (C, %s);\n\n", name);
@@ -187,17 +159,10 @@ gen_reps(
 	printf("         %-*s at 0 range %2d .. %2d;\n", width, nap[i].name,
 	       low - bias, high - bias);
     }
-  if (mask != 0)
-    {
-      l = find_pos((char *)&mask, sizeof(mask), &low, &high);
-      if (l >= 0)
-	printf("         %-*s at 0 range %2d .. %2d;\n", width, unused_name,
-	       low - bias, high - bias);
-    }
-  i = 1;
-  n = cnt;
   printf("      end record;\n");
+  printf("   pragma Warnings (Off);");
   printf("   for %s'Size use %d;\n", name, len_bits);
+  printf("   pragma Warnings (On);\n");
   printf("   --  Please note: this rep. clause is generated and may be\n");
   printf("   --               different on your system.");
 }
@@ -281,49 +246,49 @@ gen_attr_set(const char *name)
    */
   static const name_attribute_pair nap[] =
   {
-#if A_STANDOUT
+#ifdef A_STANDOUT
     {"Stand_Out", A_STANDOUT},
 #endif
-#if A_UNDERLINE
+#ifdef A_UNDERLINE
     {"Under_Line", A_UNDERLINE},
 #endif
-#if A_REVERSE
+#ifdef A_REVERSE
     {"Reverse_Video", A_REVERSE},
 #endif
-#if A_BLINK
+#ifdef A_BLINK
     {"Blink", A_BLINK},
 #endif
-#if A_DIM
+#ifdef A_DIM
     {"Dim_Character", A_DIM},
 #endif
-#if A_BOLD
+#ifdef A_BOLD
     {"Bold_Character", A_BOLD},
 #endif
-#if A_ALTCHARSET
+#ifdef A_ALTCHARSET
     {"Alternate_Character_Set", A_ALTCHARSET},
 #endif
-#if A_INVIS
+#ifdef A_INVIS
     {"Invisible_Character", A_INVIS},
 #endif
-#if A_PROTECT
+#ifdef A_PROTECT
     {"Protected_Character", A_PROTECT},
 #endif
-#if A_HORIZONTAL
+#ifdef A_HORIZONTAL
     {"Horizontal", A_HORIZONTAL},
 #endif
-#if A_LEFT
+#ifdef A_LEFT
     {"Left", A_LEFT},
 #endif
-#if A_LOW
+#ifdef A_LOW
     {"Low", A_LOW},
 #endif
-#if A_RIGHT
+#ifdef A_RIGHT
     {"Right", A_RIGHT},
 #endif
-#if A_TOP
+#ifdef A_TOP
     {"Top", A_TOP},
 #endif
-#if A_VERTICAL
+#ifdef A_VERTICAL
     {"Vertical", A_VERTICAL},
 #endif
     {(char *)0, 0}
