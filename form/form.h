@@ -50,15 +50,6 @@ typedef void *FIELD_CELL;
 #define NCURSES_FIELD_INTERNALS /* nothing */
 #endif
 
-#ifndef NCURSES_WIDECHAR
-#if defined(_XOPEN_SOURCE_EXTENDED) || (defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE - 0 >= 500))
-#define NCURSES_WIDECHAR 1
-#else
-#define NCURSES_WIDECHAR 0
-#endif
-#endif /* NCURSES_WIDECHAR */
-
-
 typedef int Form_Options;
 typedef int Field_Options;
 
@@ -405,7 +396,7 @@ extern NCURSES_EXPORT(int)	post_form (FORM *);
 extern NCURSES_EXPORT(int)	unpost_form (FORM *);
 extern NCURSES_EXPORT(int)	pos_form_cursor (FORM *);
 extern NCURSES_EXPORT(int)	form_driver (FORM *,int);
-# if defined(NCURSES_WIDECHAR) && 1
+# ifdef NCURSES_WIDECHAR
 extern NCURSES_EXPORT(int)	form_driver_w (FORM *,int,wchar_t);
 # endif
 extern NCURSES_EXPORT(int)	set_form_userptr (FORM *,void *);
