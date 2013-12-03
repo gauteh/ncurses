@@ -396,7 +396,7 @@ extern NCURSES_EXPORT(int)	post_form (FORM *);
 extern NCURSES_EXPORT(int)	unpost_form (FORM *);
 extern NCURSES_EXPORT(int)	pos_form_cursor (FORM *);
 extern NCURSES_EXPORT(int)	form_driver (FORM *,int);
-# ifdef NCURSES_WIDECHAR
+# if NCURSES_WIDECHAR
 extern NCURSES_EXPORT(int)	form_driver_w (FORM *,int,wchar_t);
 # endif
 extern NCURSES_EXPORT(int)	set_form_userptr (FORM *,void *);
