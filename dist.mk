@@ -1,5 +1,5 @@
 ##############################################################################
-# Copyright (c) 1998-2012,2013 Free Software Foundation, Inc.                #
+# Copyright (c) 1998-2013,2014 Free Software Foundation, Inc.                #
 #                                                                            #
 # Permission is hereby granted, free of charge, to any person obtaining a    #
 # copy of this software and associated documentation files (the "Software"), #
@@ -25,7 +25,7 @@
 # use or other dealings in this Software without prior written               #
 # authorization.                                                             #
 ##############################################################################
-# $Id: dist.mk,v 1.960 2013/12/07 15:21:58 tom Exp $
+# $Id: dist.mk,v 1.968 2014/01/25 16:16:43 tom Exp $
 # Makefile for creating ncurses distributions.
 #
 # This only needs to be used directly as a makefile by developers, but
@@ -37,7 +37,7 @@ SHELL = /bin/sh
 # These define the major/minor/patch versions of ncurses.
 NCURSES_MAJOR = 5
 NCURSES_MINOR = 9
-NCURSES_PATCH = 20131207
+NCURSES_PATCH = 20140125
 
 # We don't append the patch to the version, since this only applies to releases
 VERSION = $(NCURSES_MAJOR).$(NCURSES_MINOR)
@@ -99,7 +99,13 @@ doc/hackguide.doc: doc/html/hackguide.html
 MANPROG	= tbl | nroff -mandoc -rLL=65n -rLT=71n -Tascii
 
 manhtml:
-	@rm -f doc/html/man/*.html
+	@for f in doc/html/man/*.html; do \
+	   test -f $$f || continue; \
+	   case $$f in \
+	   */index.html) ;; \
+	   *) rm -f $$f ;; \
+	   esac; \
+	done
 	@mkdir -p doc/html/man
 	@rm -f subst.tmp ;
 	@for f in man/*.[0-9]*; do \
@@ -136,9 +142,15 @@ manhtml:
 			-e 's/>/\&gt;/g' \
 	   >> doc/html/man/$$g ;\
 	   echo '-->' >> doc/html/man/$$g ;\
-	   ./edit_man.sh normal editing /usr/man man $$f | $(MANPROG) | tr '\255' '-' | $(MAN2HTML) -title "$$T" | \
-	   sed -f subst.sed |\
-	   sed -e 's/"curses.3x.html"/"ncurses.3x.html"/g' \
+	   ./edit_man.sh normal editing /usr/man man $$f | \
+		   $(MANPROG) | \
+		   tr '\255' '-' | \
+		   $(MAN2HTML) \
+		   	-title "$$T" \
+			-aliases man/manhtml.aliases \
+			-externs man/manhtml.externs | \
+		   sed -f subst.sed |\
+		   sed -e 's/"curses.3x.html"/"ncurses.3x.html"/g' \
 	   >> doc/html/man/$$g ;\
 	done
 	@rm -f subst.sed
