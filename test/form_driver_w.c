@@ -48,108 +48,108 @@
 int
 main(void)
 {
-    FIELD *field[3];
-    FORM *my_form;
-    bool done = FALSE;
+  FIELD *field[3];
+  FORM *my_form;
+  bool done = FALSE;
 
-    setlocale(LC_ALL, "");
+  setlocale(LC_ALL, "");
 
-    /* Initialize curses */
-    initscr();
-    cbreak();
-    noecho();
-    keypad(stdscr, TRUE);
+  /* Initialize curses */
+  initscr();
+  cbreak();
+  noecho();
+  keypad(stdscr, TRUE);
 
-    /* Initialize the fields */
-    field[0] = new_field(1, 10, 4, 18, 0, 0);
-    field[1] = new_field(1, 10, 6, 18, 0, 0);
-    field[2] = NULL;
+  /* Initialize the fields */
+  field[0] = new_field(1, 10, 4, 18, 0, 0);
+  field[1] = new_field(1, 10, 6, 18, 0, 0);
+  field[2] = NULL;
 
-    /* Set field options */
-    set_field_back(field[0], A_UNDERLINE);	/* Print a line for the option  */
-    field_opts_off(field[0], O_AUTOSKIP);	/* Don't go to next field when this */
-    /* Field is filled up           */
-    set_field_back(field[1], A_UNDERLINE);
-    field_opts_off(field[1], O_AUTOSKIP);
+  /* Set field options */
+  set_field_back(field[0], A_UNDERLINE);	/* Print a line for the option  */
+  field_opts_off(field[0], O_AUTOSKIP);	/* Don't go to next field when this */
+  /* Field is filled up           */
+  set_field_back(field[1], A_UNDERLINE);
+  field_opts_off(field[1], O_AUTOSKIP);
 
-    /* Create the form and post it */
-    my_form = new_form(field);
-    post_form(my_form);
-    refresh();
+  /* Create the form and post it */
+  my_form = new_form(field);
+  post_form(my_form);
+  refresh();
 
-    mvprintw(4, 10, "Value 1:");
-    mvprintw(6, 10, "Value 2:");
-    refresh();
+  mvprintw(4, 10, "Value 1:");
+  mvprintw(6, 10, "Value 2:");
+  refresh();
 
-    /* Loop through to get user requests */
-    while (!done) {
-	wint_t ch;
-	int ret = get_wch(&ch);
+  /* Loop through to get user requests */
+  while (!done) {
+    wint_t ch;
+    int ret = get_wch(&ch);
 
-	mvprintw(8, 10, "Got %d (%#x), type: %s", ch, ch,
-		 (ret == KEY_CODE_YES)
-		 ? "KEY_CODE_YES"
-		 : ((ret == OK)
-		    ? "OK"
-		    : ((ret == ERR)
-		       ? "ERR"
-		       : "?")));
-	clrtoeol();
+    mvprintw(8, 10, "Got %d (%#x), type: %s", ch, ch,
+        (ret == KEY_CODE_YES)
+        ? "KEY_CODE_YES"
+        : ((ret == OK)
+          ? "OK"
+          : ((ret == ERR)
+            ? "ERR"
+            : "?")));
+    clrtoeol();
 
-	switch (ret) {
-	case KEY_CODE_YES:
-	    switch (ch) {
-	    case KEY_DOWN:
-		/* Go to next field */
-		form_driver(my_form, REQ_NEXT_FIELD);
-		/* Go to the end of the present buffer */
-		/* Leaves nicely at the last character */
-		form_driver(my_form, REQ_END_LINE);
-		break;
-	    case KEY_UP:
-		/* Go to previous field */
-		form_driver(my_form, REQ_PREV_FIELD);
-		form_driver(my_form, REQ_END_LINE);
-		break;
-	    default:
+    switch (ret) {
+      case KEY_CODE_YES:
+        switch (ch) {
+          case KEY_DOWN:
+            /* Go to next field */
+            form_driver(my_form, REQ_NEXT_FIELD);
+            /* Go to the end of the present buffer */
+            /* Leaves nicely at the last character */
+            form_driver(my_form, REQ_END_LINE);
+            break;
+          case KEY_UP:
+            /* Go to previous field */
+            form_driver(my_form, REQ_PREV_FIELD);
+            form_driver(my_form, REQ_END_LINE);
+            break;
+          default:
 #if 0
-		/* If this is a normal character, it gets printed */
-		form_driver(my_form, ch);
-		wadd_wch(my_form->current->working, ch);
+            /* If this is a normal character, it gets printed */
+            form_driver(my_form, ch);
+            wadd_wch(my_form->current->working, ch);
 #endif
-		break;
-	    }
-	    break;
-	case OK:
-	    switch (ch) {
-	    case CTRL('D'):
-	    case QUIT:
-	    case ESCAPE:
-		done = TRUE;
-		break;
-	    default:
-		form_driver_w(my_form, OK, ch);
-		break;
-	    }
-	    break;
-	}
+            break;
+        }
+        break;
+      case OK:
+        switch (ch) {
+          case CTRL('D'):
+          case QUIT:
+          case ESCAPE:
+            done = TRUE;
+            break;
+          default:
+            form_driver_w(my_form, OK, ch);
+            break;
+        }
+        break;
     }
+  }
 
-    /* Un post form and free the memory */
-    unpost_form(my_form);
-    free_form(my_form);
-    free_field(field[0]);
-    free_field(field[1]);
+  /* Un post form and free the memory */
+  unpost_form(my_form);
+  free_form(my_form);
+  free_field(field[0]);
+  free_field(field[1]);
 
-    endwin();
-    ExitProgram(EXIT_SUCCESS);
+  endwin();
+  ExitProgram(EXIT_SUCCESS);
 }
 
 #else
-int
+  int
 main(void)
 {
-    printf("This program requires the wide-ncurses and forms library\n");
-    ExitProgram(EXIT_FAILURE);
+  printf("This program requires the wide-ncurses and forms library\n");
+  ExitProgram(EXIT_FAILURE);
 }
 #endif /* USE_WIDEC_SUPPORT */
