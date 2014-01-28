@@ -101,22 +101,17 @@ main(void)
         switch (ch) {
           case KEY_DOWN:
             /* Go to next field */
-            form_driver(my_form, REQ_NEXT_FIELD);
+            form_driver_w(my_form, KEY_CODE_YES, REQ_NEXT_FIELD);
             /* Go to the end of the present buffer */
             /* Leaves nicely at the last character */
-            form_driver(my_form, REQ_END_LINE);
+            form_driver_w(my_form, KEY_CODE_YES, REQ_END_LINE);
             break;
           case KEY_UP:
             /* Go to previous field */
-            form_driver(my_form, REQ_PREV_FIELD);
-            form_driver(my_form, REQ_END_LINE);
+            form_driver_w(my_form, KEY_CODE_YES, REQ_PREV_FIELD);
+            form_driver_w(my_form, KEY_CODE_YES, REQ_END_LINE);
             break;
           default:
-#if 0
-            /* If this is a normal character, it gets printed */
-            form_driver(my_form, ch);
-            wadd_wch(my_form->current->working, ch);
-#endif
             break;
         }
         break;
